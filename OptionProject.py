@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.stats import norm
 
-print("-----European Option Premium Calculator-----")
+print("-----European Option Premium Calculator-----")                                  # Gets user input
+
 Option = input("Are you purchasing a Call or a Put? : ")
 S0 = float(input("Enter the inital price of a single share of the stock (ex: 100.0) : "))       # Initial stock price
 K = float(input("Enter the desired Strike Price: "))                                            # Strike Price
@@ -9,12 +10,12 @@ Time = float(input("Enter the time until maturity (# of months): "))            
 Rate = float(input("Enter the risk free interest rate (percent): "))                            # Risk free interest rate
 sigma = float(input("Enter the Volatility of the stock (ex: 0.3): "))                            # Volatility of the stock
 
-Sample = input("Is a sample size of 200,000 a reasonable amount? : ")
+Sample = input("Is a sample size of 200,000 a reasonable amount? : ")                # Checks for adequate sample size
 if Sample.lower() == "no":
     samplesize = float(input("Input a new sample size: "))
 else:
     samplesize = 200000
-
+                                                                              # Ask the user if the default confidence interval is acceptable
 Confidence = input("The algorithm is utilizing a 95% Confidence Interval. Is this acceptable? : ")
 if Confidence.lower() == "no":
     interval = float(input("Enter a new Confidence Interval (percent): "))
@@ -29,9 +30,11 @@ r = Rate / 100
 #Pseudo Random Number Generator
 rng = np.random.default_rng(12345)
 
+# Function defined to calculate call option
 def Call(S0, K, T, r, sigma, samplesize, myepsilon, rng):
 
-    def black_scholes_call(S0, K, r, T, sigma):
+    # Calculate call option price using the Black-Scholes formula 
+    def black_scholes_call(S0, K, r, T, sigma):                             
         d1 = (np.log(S0 / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
         d2 = d1 - sigma * np.sqrt(T)
         tmp1 = S0 * norm.cdf(d1, loc=0, scale=1)
@@ -39,7 +42,7 @@ def Call(S0, K, T, r, sigma, samplesize, myepsilon, rng):
         price = tmp1 - tmp2
         return price
 
-
+    # Simulate terminal stock prices
     def terminal_stockprice(rng, S0, T, r, sigma, samplesize):
         mystandardnormalsample = rng.standard_normal(size=samplesize)
         tmp1 = (r - 0.5*(sigma ** 2)) * T                                   # It accounts for the average rate of return over time, adjusted for volatility.
@@ -47,6 +50,7 @@ def Call(S0, K, T, r, sigma, samplesize, myepsilon, rng):
         stockprice = S0 * np.exp(tmp1 + tmp2)
         return stockprice
 
+    # Monte Carlo simulation for call option pricing
     def bs_call_mc(rng, S0, K, T, r, sigma, samplesize, myepsilon):
         # Generate terminal stock prices.
         mystockprice = terminal_stockprice(rng, S0, T, r, sigma, samplesize)  # Compute payoffs.
@@ -73,6 +77,7 @@ def Call(S0, K, T, r, sigma, samplesize, myepsilon, rng):
     print('MC price: {:.4f} and stdev of MC est: {:.4f}'.format(MCresults[0], MCresults[1]))
     print('CI based on MC is ({:.4f}, {:.4f})'.format(MCresults[2], MCresults[3]))
 
+# Function defined to calculate call option
 def Put(S0, K, T, r, sigma, samplesize, myepsilon, rng):
 
     def black_scholes_put(S0, K, r, T, sigma):
